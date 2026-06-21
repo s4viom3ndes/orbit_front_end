@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy-950: #070d1a;
+  --navy-900: #0f1729;
+  --navy-800: #162036;
+  --navy-700: #1e2d48;
+  --teal: #2ECFE4;
+  --indigo: #6366f1;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--navy-950);
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Scrollbar premium */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--navy-900);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--navy-700);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal);
+}
+
+/* Selection */
+::selection {
+  background: rgba(46, 207, 228, 0.2);
+  color: #fff;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #162036 25%, #1e2d48 50%, #162036 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(22, 32, 54, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(46, 207, 228, 0.08);
+}
+
+/* Orbit gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #2ECFE4, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Chart tooltip */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #162036 !important;
+  border: 1px solid rgba(46, 207, 228, 0.15) !important;
+  border-radius: 8px !important;
+  color: #f1f5f9 !important;
+}

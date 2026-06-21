@@ -1,0 +1,20 @@
+{
+  "name": "Orbit — Controle Financeiro",
+  "short_name": "Orbit",
+  "description": "Seu limite diário adaptativo. Controle financeiro sem fricção.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070d1a",
+  "theme_color": "#2ECFE4",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["finance", "productivity"]
+}
