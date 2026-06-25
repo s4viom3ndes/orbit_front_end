@@ -19,9 +19,12 @@ export function formatCurrency(value: number | string | null | undefined, curren
 
 export function formatDate(date: string | Date): string {
   const d = typeof date === "string" ? parseISO(date) : date;
-  if (isToday(d)) return "Hoje";
-  if (isYesterday(d)) return "Ontem";
-  return format(d, "d 'de' MMMM", { locale: ptBR });
+  const normalized = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+
+
+  if (isToday(normalized)) return "Hoje";
+  if (isYesterday(normalized)) return "Ontem";
+  return format(normalized, "d 'de' MMMM", { locale: ptBR });
 }
 
 export function formatShortDate(date: string | Date): string {

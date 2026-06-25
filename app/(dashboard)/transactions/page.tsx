@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TransactionSkeleton } from "@/components/ui/skeleton";
-import { transactionsApi, categoriesApi } from "@/lib/api";
+import { transactionsApi, categoriesApi, accountsApi } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { AddTransactionModal } from "@/components/features/transactions/add-transaction-modal";
 import { AddRecurringModal } from "@/components/features/transactions/add-recurring-modal";
@@ -17,9 +17,9 @@ import type { Transaction, TransactionType, Category } from "@/types";
 
 const TYPE_FILTERS: { label: string; value: TransactionType | "all" }[] = [
   { label: "Todos", value: "all" },
-  { label: "Receitas", value: "income" },
-  { label: "Despesas", value: "expense" },
-  { label: "Transferências", value: "transfer" },
+  { label: "Receitas", value: "INCOME" },
+  { label: "Despesas", value: "EXPENSE" },
+  { label: "Transferências", value: "TRANSFER" },
 ];
 
 export default function TransactionsPage() {
@@ -30,8 +30,14 @@ export default function TransactionsPage() {
   const [page, setPage] = useState(1);
   const [showAdd, setShowAdd] = useState(false);
   const [showRecurring, setShowRecurring] = useState(false);
+  const [selectedAccountID, setSelectedAccountID] = useState('');
   const qc = useQueryClient();
 
+  const { data: accounts } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: () => accountsApi.list().then((r) => r.data),
+  });
+  
   const hasDateFilter = startDate || endDate;
 
   const clearDateFilter = () => {
@@ -41,7 +47,7 @@ export default function TransactionsPage() {
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ["transactions", { page, type: typeFilter, search, startDate, endDate }],
+    queryKey: ["transactions", { page, type: typeFilter, search, startDate, endDate, accountsId: selectedAccountID }],
     queryFn: () =>
       transactionsApi
         .list({
@@ -51,6 +57,7 @@ export default function TransactionsPage() {
           search: search || undefined,
           start_date: startDate || undefined,
           end_date: endDate || undefined,
+          accountId: selectedAccountID
         })
         .then((r) => r.data),
   });
@@ -59,6 +66,8 @@ export default function TransactionsPage() {
     queryKey: ["categories"],
     queryFn: () => categoriesApi.list().then((r) => r.data),
   });
+
+
 
   const recategorizeMutation = useMutation({
     mutationFn: (id: string) => transactionsApi.recategorize(id),
@@ -86,6 +95,18 @@ export default function TransactionsPage() {
   const transactions = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
+
+  useEffect(() => {
+  if (accounts?.length && !selectedAccountID) {
+    setSelectedAccountID(accounts[0].id);
+    console.log('effect')
+  }
+}, [accounts, selectedAccountID]);
+
+  useEffect(() => {
+    console.log(typeFilter);
+  }, [typeFilter]);
+
 
   return (
     <div>
@@ -115,6 +136,7 @@ export default function TransactionsPage() {
         {/* Type filters + Date range */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           <div className="flex gap-2 overflow-x-auto pb-1 flex-1">
+
             {TYPE_FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -128,8 +150,14 @@ export default function TransactionsPage() {
                 {f.label}
               </button>
             ))}
-          </div>
+            <select value={selectedAccountID} onChange={(e) => {setSelectedAccountID(e.target.value); console.log(e.target.value)}} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 bg-navy-800 text-slate-400 border border-navy-700/50 hover:cursor-pointer `}>
+              {(accounts != undefined) ? accounts.map((acc) => (
+                <option key={acc.id} value={acc.id}>{acc.name} - Saldo: R${acc.balance}</option>
+              )) : <></>}
+            </select>
 
+          </div>
+            
           {/* Date range picker */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <Calendar className="h-4 w-4 text-slate-500" />
@@ -180,9 +208,9 @@ export default function TransactionsPage() {
             </div>
           ) : (
             <div className="divide-y divide-navy-700/30">
-              {transactions.map((tx) => (
+              {[...transactions].reverse().map((tx) => (
                 <TransactionTableRow
-                  key={tx.id}
+                  key={`${tx.id}-${selectedAccountID}`}
                   transaction={tx}
                   categories={categories ?? []}
                   onRecategorize={() => recategorizeMutation.mutate(tx.id)}
@@ -190,6 +218,7 @@ export default function TransactionsPage() {
                   onUpdateCategory={(category_id) =>
                     updateCategoryMutation.mutate({ id: tx.id, category_id })
                   }
+                  typeFilter={typeFilter}
                 />
               ))}
             </div>
@@ -211,13 +240,17 @@ export default function TransactionsPage() {
       </div>
 
       {showAdd && (
+
+        
         <AddTransactionModal
           categories={categories ?? []}
+          accounts={accounts ?? []}
           onClose={() => setShowAdd(false)}
           onSuccess={() => {
             setShowAdd(false);
             qc.invalidateQueries({ queryKey: ["transactions"] });
             qc.invalidateQueries({ queryKey: ["budget"] });
+            qc.invalidateQueries({ queryKey: ["accounts"] });
           }}
         />
       )}
@@ -230,6 +263,7 @@ export default function TransactionsPage() {
             setShowRecurring(false);
             qc.invalidateQueries({ queryKey: ["transactions"] });
             qc.invalidateQueries({ queryKey: ["budget"] });
+            qc.invalidateQueries({ queryKey: ["accounts"] });
           }}
         />
       )}
@@ -313,15 +347,22 @@ function TransactionTableRow({
   onRecategorize,
   onDelete,
   onUpdateCategory,
+  typeFilter,
 }: {
   transaction: Transaction;
   categories: Category[];
   onRecategorize: () => void;
   onDelete: () => void;
   onUpdateCategory: (category_id: string | null) => void;
+  typeFilter: TransactionType | "all";
 }) {
-  const isIncome = tx.type === "income";
-  const isTransfer = tx.type === "transfer";
+
+  if(typeFilter !== "all" && tx.type !== typeFilter) return null
+
+  const isIncome = tx.type === "INCOME";
+  const isTransfer = tx.type === "TRANSFER";
+
+  // if(typeFilter !== "all" && tx.type !== typeFilter) return null
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-5 py-3.5 hover:bg-navy-900/40 transition-colors">

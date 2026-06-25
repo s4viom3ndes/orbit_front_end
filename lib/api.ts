@@ -124,7 +124,7 @@ export const openFinanceApi = {
 // ─── Transactions ──────────────────────────────────────────────────────────
 export const transactionsApi = {
   list: (filters?: TransactionFilters) =>
-    api.get<PaginatedResponse<Transaction>>("/transactions", { params: filters }),
+    api.get<PaginatedResponse<Transaction>>(`accounts/${filters?.accountId}/transactions`),
 
   get: (id: string) => api.get<Transaction>(`/transactions/${id}`),
 
@@ -133,9 +133,11 @@ export const transactionsApi = {
     amount: number;
     description: string;
     date: string;
-    category_id?: string;
-    account_id?: string;
-  }) => api.post<Transaction>("/transactions", data),
+    categoryId?: string;
+    accountId?: string;
+  // }) => console.log(data),
+  }) => api.post<Transaction>(`/accounts/${data.accountId}/transactions`, data),
+
 
   createRecurring: (data: {
     type: "INCOME" | "EXPENSE";

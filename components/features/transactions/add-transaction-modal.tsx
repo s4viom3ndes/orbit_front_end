@@ -8,25 +8,27 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { transactionsApi } from "@/lib/api";
-import type { Category } from "@/types";
+import type { Account, Category } from "@/types";
 
 const schema = z.object({
   description: z.string().min(1, "Descrição obrigatória"),
   amount: z.coerce.number().positive("Valor deve ser positivo"),
-  type: z.enum(["income", "expense", "transfer"]),
+  type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
   date: z.string(),
-  category_id: z.string().optional(),
+  categoryId: z.string().optional(),
+  accountId: z.string()
 });
 
 type FormData = z.infer<typeof schema>;
 
 interface Props {
   categories: Category[];
+  accounts: Account[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
+export function AddTransactionModal({ categories, accounts, onClose, onSuccess }: Props) {
   const {
     register,
     handleSubmit,
@@ -34,10 +36,12 @@ export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      type: "expense",
+      type: "EXPENSE",
       date: new Date().toISOString().split("T")[0],
     },
   });
+
+
 
   // Close on Escape
   useEffect(() => {
@@ -46,12 +50,15 @@ export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
+
   const onSubmit = async (data: FormData) => {
     try {
+      console.log(data);
       await transactionsApi.create(data);
       toast.success("Transação adicionada!");
       onSuccess();
     } catch {
+      console.log("erro");
       toast.error("Erro ao adicionar transação");
     }
   };
@@ -79,18 +86,16 @@ export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-slate-300">Tipo</label>
             <div className="grid grid-cols-3 gap-2">
-              {(["expense", "income", "transfer"] as const).map((type) => (
-                <label key={type} className="cursor-pointer">
+              {(["EXPENSE", "INCOME", "TRANSFER"] as const).map((type) => (
+                <label key={type} className={`cursor-pointer block text-center py-2 rounded-xl border text-sm font-medium transition-all ${
+                  type === "EXPENSE"
+                    ? "border-danger/30 text-danger has-[:checked]:bg-danger/10"
+                    : type === "INCOME"
+                    ? "border-success/30 text-success has-[:checked]:bg-success/10"
+                    : "border-indigo-500/30 text-indigo-400 has-[:checked]:bg-indigo-500/10"
+                } hover:opacity-80`}>
                   <input type="radio" value={type} {...register("type")} className="sr-only" />
-                  <span className={`block text-center py-2 rounded-xl border text-sm font-medium transition-all ${
-                    type === "expense"
-                      ? "border-danger/30 text-danger has-[:checked]:bg-danger/10"
-                      : type === "income"
-                      ? "border-success/30 text-success has-[:checked]:bg-success/10"
-                      : "border-indigo-500/30 text-indigo-400 has-[:checked]:bg-indigo-500/10"
-                  } hover:opacity-80`}>
-                    {type === "expense" ? "Despesa" : type === "income" ? "Receita" : "Transfer."}
-                  </span>
+                  <span>{type === "EXPENSE" ? "Despesa" : type === "INCOME" ? "Receita" : "Transfer."}</span>
                 </label>
               ))}
             </div>
@@ -111,6 +116,7 @@ export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
             error={errors.amount?.message}
             {...register("amount")}
           />
+          
 
           <Input
             label="Data"
@@ -119,11 +125,23 @@ export function AddTransactionModal({ categories, onClose, onSuccess }: Props) {
             {...register("date")}
           />
 
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-300">Conta</label>
+            <select
+              {...register("accountId")}
+              className="w-full rounded-xl border border-navy-700 bg-navy-900 px-4 py-3 text-sm text-slate-100 focus:border-teal-400/60 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition-all"
+            >
+              {accounts.map((acc) => (
+                <option key={acc.id} value={acc.id}>{acc.name} - Saldo: R${acc.balance}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Category select */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-slate-300">Categoria</label>
             <select
-              {...register("category_id")}
+              {...register("categoryId")}
               className="w-full rounded-xl border border-navy-700 bg-navy-900 px-4 py-3 text-sm text-slate-100 focus:border-teal-400/60 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition-all"
             >
               <option value="">Sem categoria</option>
