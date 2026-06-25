@@ -17,6 +17,7 @@ declare global {
   interface Window {
     PluggyConnect: new (config: {
       connectToken: string;
+      includeSandbox: boolean;
       onSuccess: (data: { item: { id: string } }) => void;
       onError: (error: unknown) => void;
       onClose: () => void;
@@ -50,7 +51,7 @@ export default function AccountsPage() {
     if (document.getElementById("pluggy-connect-script")) return;
     const script = document.createElement("script");
     script.id = "pluggy-connect-script";
-    script.src = "https://cdn.pluggy.ai/pluggy-connect/v2/pluggy-connect.js";
+    script.src = "https://cdn.pluggy.ai/pluggy-connect/v2.8.2/pluggy-connect.js";
     script.async = true;
     document.body.appendChild(script);
   }, []);
@@ -90,6 +91,7 @@ export default function AccountsPage() {
 
       const widget = new window.PluggyConnect({
         connectToken,
+        includeSandbox: true,
         onSuccess: async ({ item }) => {
           toast.success("Banco conectado! Importando transações...");
           try {
@@ -204,7 +206,7 @@ export default function AccountsPage() {
                           "linear-gradient(135deg,#2ECFE4,#6366f1)",
                       }}
                     >
-                      {acc.institution_name.slice(0, 2).toUpperCase()}
+                      {(acc.institution_name ?? "").slice(0, 2).toUpperCase() || ""}
                     </div>
 
                     {/* Info */}

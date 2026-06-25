@@ -46,7 +46,7 @@ export interface Account {
 }
 
 // ─── Transaction ─────────────────────────────────────────────────────────────
-export type TransactionType = "income" | "expense" | "transfer";
+export type TransactionType = "INCOME" | "EXPENSE" | "TRANSFER";
 export type TransactionSource = "open_finance" | "manual" | "import";
 
 export interface Transaction {
@@ -168,7 +168,7 @@ export interface TransactionFilters {
   per_page?: number;
   type?: TransactionType;
   category_id?: string;
-  account_id?: string;
+  accountId?: string;
   start_date?: string;
   end_date?: string;
   search?: string;
