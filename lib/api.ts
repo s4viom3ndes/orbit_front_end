@@ -10,6 +10,7 @@ import type {
   TransactionFilters,
   TransactionSummary,
   DailyBudget,
+  DailyBreakdown,
   Budget,
   ProjectionsResponse,
   Category,
@@ -166,6 +167,8 @@ export const transactionsApi = {
 export const budgetApi = {
   current: () => api.get<Budget>("/budget/current"),
   daily: () => api.get<DailyBudget>("/budget/daily"),
+  dailyBreakdown: (params?: { year?: number; month?: number }) =>
+    api.get<DailyBreakdown>("/budget/daily-breakdown", { params }),
   history: () => api.get<Budget[]>("/budget/history"),
   create: (data: { month: number; year: number; totalLimit: number }) =>
     api.post<Budget>("/budgets", data),

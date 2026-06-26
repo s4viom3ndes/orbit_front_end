@@ -104,6 +104,23 @@ export interface DailyBudget {
   status: BudgetStatus;
 }
 
+export interface DailyBreakdownDay {
+  date: string;
+  spent: number;
+  limit: number;
+  remaining: number;
+  status: "on_track" | "over_budget";
+  transaction_count: number;
+}
+
+export interface DailyBreakdown {
+  period: { year: number; month: number };
+  total_budget: number;
+  total_spent: number;
+  daily_target: number;
+  days: DailyBreakdownDay[];
+}
+
 export interface Budget {
   id: string;
   month: number;

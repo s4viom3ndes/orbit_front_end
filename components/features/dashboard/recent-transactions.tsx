@@ -48,8 +48,8 @@ export function RecentTransactions({ transactions, loading }: Props) {
 }
 
 function TransactionRow({ transaction: tx }: { transaction: Transaction }) {
-  const isIncome = tx.type === "income";
-  const isTransfer = tx.type === "transfer";
+  const isIncome = tx.type === "INCOME";
+  const isTransfer = tx.type === "TRANSFER";
 
   return (
     <div className="flex items-center gap-3 py-3 hover:bg-navy-900/40 rounded-xl px-2 -mx-2 transition-colors cursor-pointer">

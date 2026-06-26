@@ -6,6 +6,7 @@ import { DailyLimitCard } from "@/components/features/dashboard/daily-limit-card
 import { BudgetOverviewCard } from "@/components/features/dashboard/budget-overview-card";
 import { SpendingChart } from "@/components/features/dashboard/spending-chart";
 import { RecentTransactions } from "@/components/features/dashboard/recent-transactions";
+import { DailySpendingCard } from "@/components/features/dashboard/daily-spending-card";
 import { AccountsCard } from "@/components/features/dashboard/accounts-card";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -95,7 +96,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Row 2: Chart + Recent transactions */}
+        {/* Row 2: Day-by-day spending */}
+        {daily && <DailySpendingCard />}
+
+        {/* Row 3: Chart + Recent transactions */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           <div className="lg:col-span-2">
             <SpendingChart data={summary ?? []} loading={loadingSummary} />
