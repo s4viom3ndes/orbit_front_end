@@ -154,7 +154,10 @@ export const transactionsApi = {
     data: Partial<Pick<Transaction, "description" | "category_id" | "date">>
   ) => api.patch<Transaction>(`/transactions/${id}`, data),
 
-  delete: (id: string) => api.delete(`/transactions/${id}`),
+  // delete: (id: string) => api.delete(`/transactions/${id}`),
+  delete: (id: string, accountid: string) => {
+    return api.delete(`/accounts/${accountid}/transactions/${id}`);
+  },
 
   recategorize: (id: string) => api.post<Transaction>(`/transactions/${id}/recategorize`),
 

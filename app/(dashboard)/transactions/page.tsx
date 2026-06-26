@@ -78,10 +78,12 @@ export default function TransactionsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => transactionsApi.delete(id),
+    mutationFn: ({id, accountId}: {id: string, accountId: string}) => transactionsApi.delete(id, accountId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["transactions"] });
-      toast.success("Transação removida");
+            qc.invalidateQueries({ queryKey: ["transactions"] });
+            qc.invalidateQueries({ queryKey: ["budget"] });
+            qc.invalidateQueries({ queryKey: ["accounts"] });      
+            toast.success("Transação removida");
     },
   });
 
@@ -214,7 +216,7 @@ export default function TransactionsPage() {
                   transaction={tx}
                   categories={categories ?? []}
                   onRecategorize={() => recategorizeMutation.mutate(tx.id)}
-                  onDelete={() => deleteMutation.mutate(tx.id)}
+                  onDelete={() => deleteMutation.mutate({ id: tx.id, accountId: selectedAccountID })}
                   onUpdateCategory={(category_id) =>
                     updateCategoryMutation.mutate({ id: tx.id, category_id })
                   }
@@ -310,9 +312,8 @@ function CategoryDropdown({
             </span>
           </>
         ) : (
-          <span className="text-xs text-slate-600 hover:text-teal-400 transition-colors">
-            + categoria
-          </span>
+
+          <></>
         )}
       </button>
 
@@ -448,14 +449,13 @@ function TransactionTableRow({
 
       {/* Actions */}
       <div className="flex items-center gap-1">
-        <button
+        {/* <button
           onClick={onRecategorize}
-          title="Recategorizar com IA"
+          title="Delete"
           className="p-1.5 rounded-lg text-slate-500 hover:text-teal-400 hover:bg-teal-400/10 transition-colors"
         >
           <Tag className="h-3.5 w-3.5" />
-        </button>
-        {tx.source === "manual" && (
+        </button> */}
           <button
             onClick={onDelete}
             title="Remover"
@@ -463,7 +463,7 @@ function TransactionTableRow({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
-        )}
+
       </div>
     </div>
   );
