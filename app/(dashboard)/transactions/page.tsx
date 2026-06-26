@@ -55,8 +55,8 @@ export default function TransactionsPage() {
           per_page: 20,
           type: typeFilter === "all" ? undefined : typeFilter,
           search: search || undefined,
-          start_date: startDate || undefined,
-          end_date: endDate || undefined,
+          start_date: startDate ? new Date(startDate + "T00:00:00").toISOString() : undefined,
+          end_date: endDate ? new Date(endDate + "T23:59:59.999").toISOString() : undefined,
           accountId: selectedAccountID
         })
         .then((r) => r.data),
@@ -219,6 +219,9 @@ export default function TransactionsPage() {
                     updateCategoryMutation.mutate({ id: tx.id, category_id })
                   }
                   typeFilter={typeFilter}
+                  startDate={startDate}
+                  endDate={endDate}
+                  search={search}
                 />
               ))}
             </div>
@@ -348,6 +351,9 @@ function TransactionTableRow({
   onDelete,
   onUpdateCategory,
   typeFilter,
+  startDate,
+  endDate,
+  search,
 }: {
   transaction: Transaction;
   categories: Category[];
@@ -355,9 +361,41 @@ function TransactionTableRow({
   onDelete: () => void;
   onUpdateCategory: (category_id: string | null) => void;
   typeFilter: TransactionType | "all";
+  startDate?: string;
+  endDate?: string;
+  search?: string;
 }) {
 
+  useEffect(() => {
+    console.log(startDate);
+    console.log(endDate);
+  })
+
   if(typeFilter !== "all" && tx.type !== typeFilter) return null
+
+  if (search) {
+  const q = search.toLowerCase().trim();
+  const haystack = [
+    tx.description_clean ?? tx.description ?? "",
+    tx.category?.name ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (!haystack.includes(q)) return null;
+}
+
+  const txDate = new Date(tx.date);
+  if (startDate) {
+    const sd = new Date(startDate);
+    if (txDate < sd) return null;
+  }
+  if (endDate) {
+    const ed = new Date(endDate );
+    if (txDate > ed) return null;
+  }
+
+
 
   const isIncome = tx.type === "INCOME";
   const isTransfer = tx.type === "TRANSFER";
