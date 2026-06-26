@@ -184,9 +184,10 @@ export default function BudgetPage() {
               <p className="text-slate-500 text-sm">Sem histórico disponível</p>
             </div>
           ) : (
+            <>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={historyChartData} barSize={20}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(7, 15, 80, 0.64)" />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false}
                   tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
@@ -199,14 +200,15 @@ export default function BudgetPage() {
                     backgroundColor: "#162036",
                     border: "1px solid rgba(46,207,228,0.15)",
                     borderRadius: "12px",
-                    color: "#f1f5f9",
                     fontSize: "12px",
                   }}
+                  cursor={{fill: 'white', opacity: 0.3}}
                 />
-                <Bar dataKey="limite" fill="#2ECFE4" radius={[4, 4, 0, 0]} opacity={0.4} />
+                <Bar dataKey="limite" fill="#2ECFE4" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="gasto" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            </>
           )}
         </Card>
 
